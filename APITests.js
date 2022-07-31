@@ -10,6 +10,8 @@ export const options = {
   duration: '15s',
 };
 
+let number = Math.floor(Math.random() * (1000011) + 1);
+
 const url = 'http://localhost:3000/products';
 const urlById = url + `/${number}`;
 const urlRelated = urlById + '/related';
@@ -62,11 +64,11 @@ const stylesRoute = function () {
     'transaction time < 1000ms': r => r.timings.duration < 1000,
     'transaction time < 2000ms': r => r.timings.duration < 2000,
   });
-}
+};
 
 export default {
   productsRoute,
   productsByIdRoute,
   relatedRoute,
   stylesRoute
-}
+};
