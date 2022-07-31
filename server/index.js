@@ -43,13 +43,13 @@ app.get(`/products/:product_id`, function (req, res) {
 
 app.get(`/products/:product_id/styles`, function (req, res) {
 
-  db.getStylesByProductId(req.params.product_id, (err, data) => {
+  db.getStylesByProductId(req.params.product_id, (err, data1, data2, data3) => {
 
     if (err) {
       console.log(err);
       res.sendStatus(500);
     } else {
-      res.status(200).send(data);
+      res.status(200).send([data1, data2, data3]);
     }
 
   });

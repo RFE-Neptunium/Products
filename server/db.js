@@ -1,11 +1,16 @@
 const mongoose = require('mongoose');
+// mongoose.set('debug', true);
 
 const { Schema } = mongoose;
 
 mongoose
-  .connect('mongodb://localhost:27017/test')
-  .then(console.log('Connected to MongoDB...'))
-  .catch((err) => console.log(err));
+  .disconnect()
+  .then(mongoose
+    .connect('mongodb://localhost:27017/Products')
+    .then(console.log('Connected to MongoDB...'))
+    .catch((err) => console.log(err))
+  )
+  .catch((err) => console.log(err))
 
 const FeaturesSchema = new Schema({
   id: Number,
@@ -30,7 +35,7 @@ const ProductSchema = new Schema({
   default_price: String,
 });
 
-const RelatedSchema = new Schema({
+const RelatedProductsSchema = new Schema({
   id: Number,
   current_product_id: Number,
   related_product_id: Number,
@@ -55,7 +60,7 @@ const StylesSchema = new Schema({
 const Features = mongoose.model('Features', FeaturesSchema);
 const Photos = mongoose.model('Photos', PhotosSchema);
 const Product = mongoose.model('Product', ProductSchema);
-const Related = mongoose.model('Related', RelatedSchema);
+const RelatedProducts = mongoose.model('RelatedProducts', RelatedProductsSchema);
 const Skus = mongoose.model('Skus', SkusSchema);
 const Styles = mongoose.model('Styles', StylesSchema);
 
@@ -87,27 +92,38 @@ const getItemByProductId = (product_id, callback) => {
 };
 
 const getStylesByProductId = (product_id, callback) => {
-  /* console.log(product_id);
 
-   Styles
-     .find({ "productId": product_id })
-     .then((styles) => {
-       styles.forEach(style => {
-         style.photos = Photos.find({ "styleId": style.id });
-         style.skus = Skus.find({ "styleId": style.id });
-       });
-     })
-     .then(() => callback(null, styles))
-     .catch(err => callback(err));
- */
+  // Styles.findOne().then((res) => console.log(res));
+
+  Styles
+    .find({ "productId": product_id })
+    .then((styles) => {
+      let ids = [];
+      styles.forEach(style => ids.push(style.id));
+      ids.sort();
+      console.log(ids);
+      Photos
+        .find({ styleId: { $in: ids } })
+        .then((photos) => {
+          Skus
+            .find({ styleId: { $in: ids } })
+            .then(skus => {
+              callback(null, styles, photos, skus);
+            })
+            .catch(err => callback(err));
+        })
+        .catch(err => callback(err));
+
+    })
+    .catch(err => callback(err));
+
 };
 
 const getRelatedItemsByProductId = (product_id, callback) => {
 
-  Related
+  RelatedProducts
     .find({ "current_product_id": product_id })
     .then((related) => {
-      console.log(related);
       callback(null, related);
     })
     .catch(err => callback(err));
